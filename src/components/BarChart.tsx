@@ -1,30 +1,40 @@
 import ReactECharts from 'echarts-for-react';
-import { ChartProps, Option } from '../types/type';
+import { ChartProps, Option, Value } from '../types/type';
 
 export const BarChart = ({ data }: ChartProps): JSX.Element => {
-  const allAlcoholData: number[] = data.map((ele): number => ele['Alcohol']);
-  // all unique val of alcohols
-  const alcoholData: number[] = [...new Set<number>(allAlcoholData)];
-  // data filtered as per alcohol's class
-  const classWiseMalicAcid = alcoholData.map((val) =>
-    data.filter((ele) => ele['Alcohol'] === val).map((ele) => ele['Malic Acid'])
-  );
-
-  const calculateAverage = (arr: number[]): number => {
-    const avg: string = (
-      arr.reduce((acc, curr) => acc + curr, 0) / arr.length
-    ).toFixed(2);
-    return parseFloat(avg);
+  const calculateValues = (): {} => {
+    let myalcohol: any = {};
+    for (const val of data) {
+      if (myalcohol[val['Alcohol']]) {
+        myalcohol[val['Alcohol']] = {
+          count: myalcohol[val['Alcohol']]['count'] + 1,
+          sum: myalcohol[val['Alcohol']]['sum'] + val['Malic Acid'],
+          avg: parseFloat(
+            (
+              (myalcohol[val['Alcohol']]['sum'] + val['Malic Acid']) /
+              (myalcohol[val['Alcohol']]['count'] + 1)
+            ).toFixed(2)
+          ),
+        };
+      } else {
+        myalcohol[val['Alcohol']] = {
+          count: 1,
+          sum: val['Malic Acid'],
+          avg: 0,
+        };
+      }
+    }
+    return myalcohol;
   };
-
-  const averageMalicAcid: number[] = classWiseMalicAcid.map((val): number =>
-    calculateAverage(val)
-  );
+  const modifiedData = calculateValues();
+  const alcohols = Object.keys(modifiedData);
+  const values: Value[] = Object.values(modifiedData);
+  const averageMalicAcid = values.map((ele) => ele.avg);
 
   const option: Option = {
     xAxis: {
       type: 'category',
-      data: alcoholData,
+      data: alcohols,
       name: 'Alcohol',
       axisTick: {
         alignWithLabel: true,

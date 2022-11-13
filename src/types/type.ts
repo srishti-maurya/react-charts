@@ -19,3 +19,5 @@ export type ChartProps = {
 };
 
 export type Option = { xAxis: {}; yAxis: {}; series: any[]; tooltip: {} };
+
+export type Value = { count: number; sum: number; avg: number };
